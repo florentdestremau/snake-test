@@ -12,10 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate HTML
+      - name: Validate project
         run: |
-          test -f index.html && echo "index.html present"
-          grep -q "/up" Caddyfile && echo "health check endpoint present"
+          test -f public/index.html && echo "index.html present"
+          test -f server.js && echo "server.js present"
+          grep -q '"/up"' server.js && echo "health check endpoint present"
 
   docker:
     needs: test

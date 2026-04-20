@@ -1,7 +1,12 @@
-FROM caddy:2-alpine
+FROM oven/bun:1-alpine
 
-COPY Caddyfile /etc/caddy/Caddyfile
-COPY index.html /srv/index.html
+WORKDIR /app
+
+COPY package.json ./
+COPY server.js ./
+COPY public/ ./public/
 
 EXPOSE 80
 VOLUME ["/storage"]
+
+CMD ["bun", "server.js"]

@@ -31,7 +31,14 @@
             padding: 10px;
         }
 
-        .game-container {
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 32px;
+        }
+
+        .game-area {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -46,25 +53,34 @@
             letter-spacing: 4px;
         }
 
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
         canvas {
+            display: block;
             border: 2px solid #00fff5;
             box-shadow: 0 0 30px rgba(0, 255, 245, 0.3), inset 0 0 60px rgba(0, 255, 245, 0.05);
             border-radius: 4px;
             max-width: 100vw;
-            max-height: 70vh;
+            max-height: 60vh;
         }
 
         .overlay {
             position: absolute;
+            inset: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 16px;
             color: white;
             font-size: 24px;
             text-align: center;
             text-shadow: 0 0 10px #00fff5;
+            background: rgba(10, 10, 10, 0.75);
+            border-radius: 4px;
         }
 
         .overlay.hidden {
@@ -93,6 +109,128 @@
             text-shadow: 0 0 20px #ff3366;
         }
 
+        .name-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .name-form input {
+            background: rgba(0, 255, 245, 0.1);
+            border: 1px solid #00fff5;
+            border-radius: 6px;
+            color: #00fff5;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            letter-spacing: 2px;
+            padding: 8px 14px;
+            text-align: center;
+            outline: none;
+            width: 200px;
+            -webkit-user-select: text;
+            user-select: text;
+            touch-action: auto;
+        }
+
+        .name-form input::placeholder {
+            color: rgba(0, 255, 245, 0.4);
+        }
+
+        .name-form button {
+            background: rgba(0, 255, 245, 0.15);
+            border: 1px solid #00fff5;
+            border-radius: 6px;
+            color: #00fff5;
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .name-form button:hover {
+            background: rgba(0, 255, 245, 0.3);
+        }
+
+        /* Leaderboard panel */
+        .leaderboard-panel {
+            width: 220px;
+            padding-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .lb-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #00fff5;
+            text-shadow: 0 0 10px #00fff5;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .lb-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .lb-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .lb-rank {
+            color: #555;
+            width: 18px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .lb-rank.top3 {
+            color: #bf00ff;
+            text-shadow: 0 0 8px #bf00ff;
+        }
+
+        .lb-name {
+            color: #ccc;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .lb-score {
+            color: #00fff5;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .lb-empty {
+            color: #444;
+            font-size: 12px;
+            text-align: center;
+            letter-spacing: 1px;
+            padding: 20px 0;
+        }
+
+        .lb-new {
+            animation: lb-highlight 2s ease-out forwards;
+        }
+
+        @keyframes lb-highlight {
+            0% { color: #00fff5; text-shadow: 0 0 12px #00fff5; }
+            100% { color: inherit; text-shadow: none; }
+        }
+
+        /* Controls */
         .controls {
             display: none;
             grid-template-columns: repeat(3, 1fr);
@@ -127,7 +265,21 @@
             letter-spacing: 2px;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
+            .main-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+            .leaderboard-panel {
+                width: 100%;
+                max-width: 400px;
+                padding-top: 0;
+            }
+            .lb-list {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
             .score {
                 font-size: 32px;
             }
@@ -159,21 +311,37 @@
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="score" id="score">0</div>
-        <canvas id="game" width="400" height="400"></canvas>
-        <div class="overlay" id="startOverlay">
-            <div class="title">SNAKE 2</div>
-            <div class="subtitle desktop-only">Press SPACE to start</div>
-            <div class="subtitle mobile-only" style="display:none">TAP to start</div>
+    <div class="main-layout">
+        <div class="game-area">
+            <div class="score" id="score">0</div>
+            <div class="canvas-wrapper">
+                <canvas id="game" width="400" height="400"></canvas>
+                <div class="overlay" id="startOverlay">
+                    <div class="title">SNAKE 2</div>
+                    <div class="subtitle desktop-only">Press SPACE to start</div>
+                    <div class="subtitle mobile-only" style="display:none">TAP to start</div>
+                </div>
+                <div class="overlay hidden" id="gameOverOverlay">
+                    <div class="title">GAME OVER</div>
+                    <div class="final-score" id="finalScore">Score: 0</div>
+                    <div class="name-form" id="nameForm">
+                        <input type="text" id="playerName" placeholder="YOUR NAME" maxlength="20" autocomplete="off" spellcheck="false">
+                        <button id="submitScore">SUBMIT SCORE</button>
+                    </div>
+                    <div class="subtitle desktop-only">Press SPACE to skip &amp; restart</div>
+                    <div class="subtitle mobile-only" style="display:none">TAP to skip &amp; restart</div>
+                </div>
+            </div>
         </div>
-        <div class="overlay hidden" id="gameOverOverlay">
-            <div class="title">GAME OVER</div>
-            <div class="final-score" id="finalScore">Score: 0</div>
-            <div class="subtitle desktop-only">Press SPACE to restart</div>
-            <div class="subtitle mobile-only" style="display:none">TAP to restart</div>
+
+        <div class="leaderboard-panel">
+            <div class="lb-title">LEADERBOARD</div>
+            <ol class="lb-list" id="lbList">
+                <li class="lb-empty">Loading...</li>
+            </ol>
         </div>
     </div>
+
     <div class="controls">
         <div></div>
         <button class="btn" data-dir="up">▲</button>
@@ -193,6 +361,10 @@
         const startOverlay = document.getElementById('startOverlay');
         const gameOverOverlay = document.getElementById('gameOverOverlay');
         const finalScoreEl = document.getElementById('finalScore');
+        const playerNameInput = document.getElementById('playerName');
+        const submitScoreBtn = document.getElementById('submitScore');
+        const nameForm = document.getElementById('nameForm');
+        const lbList = document.getElementById('lbList');
 
         const GRID_SIZE = 20;
         const TILE_COUNT = canvas.width / GRID_SIZE;
@@ -205,6 +377,50 @@
         let gameLoop = null;
         let gameState = 'start';
         let foodPulse = 0;
+        let lastSubmittedName = '';
+
+        // Leaderboard
+
+        async function fetchLeaderboard() {
+            try {
+                const res = await fetch('/api/scores');
+                renderLeaderboard(await res.json());
+            } catch (_) {}
+        }
+
+        function renderLeaderboard(scores, highlightName = null) {
+            if (!scores.length) {
+                lbList.innerHTML = '<li class="lb-empty">No scores yet</li>';
+                return;
+            }
+            let highlighted = false;
+            lbList.innerHTML = scores.map((s, i) => {
+                const isNew = !highlighted && highlightName && s.name === highlightName;
+                if (isNew) highlighted = true;
+                return `<li class="lb-entry${isNew ? ' lb-new' : ''}">
+                    <span class="lb-rank${i < 3 ? ' top3' : ''}">${i + 1}.</span>
+                    <span class="lb-name">${escHtml(s.name)}</span>
+                    <span class="lb-score">${s.score}</span>
+                </li>`;
+            }).join('');
+        }
+
+        function escHtml(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        async function submitScore(name) {
+            try {
+                const res = await fetch('/api/scores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, score }),
+                });
+                renderLeaderboard(await res.json(), name);
+            } catch (_) {}
+        }
+
+        // Game
 
         function init() {
             snake = [
@@ -323,7 +539,10 @@
             clearInterval(gameLoop);
             gameLoop = null;
             finalScoreEl.textContent = `Score: ${score}`;
+            nameForm.style.display = score > 0 ? '' : 'none';
+            playerNameInput.value = lastSubmittedName;
             gameOverOverlay.classList.remove('hidden');
+            if (score > 0) setTimeout(() => playerNameInput.focus(), 50);
         }
 
         function startGame() {
@@ -338,6 +557,18 @@
             }, 100);
         }
 
+        submitScoreBtn.addEventListener('click', async () => {
+            const name = playerNameInput.value.trim() || 'Anonymous';
+            lastSubmittedName = name;
+            nameForm.style.display = 'none';
+            await submitScore(name);
+        });
+
+        playerNameInput.addEventListener('keydown', (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') submitScoreBtn.click();
+        });
+
         function handleKey(e) {
             if (e.code === 'Space') {
                 e.preventDefault();
@@ -350,9 +581,9 @@
             if (gameState !== 'playing') return;
 
             const keyMap = {
-                'ArrowUp': { x: 0, y: -1 },
-                'ArrowDown': { x: 0, y: 1 },
-                'ArrowLeft': { x: -1, y: 0 },
+                'ArrowUp':    { x: 0, y: -1 },
+                'ArrowDown':  { x: 0, y: 1 },
+                'ArrowLeft':  { x: -1, y: 0 },
                 'ArrowRight': { x: 1, y: 0 },
                 'KeyW': { x: 0, y: -1 },
                 'KeyS': { x: 0, y: 1 },
@@ -369,9 +600,9 @@
         document.addEventListener('keydown', handleKey);
 
         const dirMap = {
-            'up': { x: 0, y: -1 },
-            'down': { x: 0, y: 1 },
-            'left': { x: -1, y: 0 },
+            'up':    { x: 0, y: -1 },
+            'down':  { x: 0, y: 1 },
+            'left':  { x: -1, y: 0 },
             'right': { x: 1, y: 0 }
         };
 
@@ -396,7 +627,9 @@
         document.querySelectorAll('.overlay').forEach(overlay => {
             overlay.addEventListener('touchstart', (e) => {
                 if (gameState === 'start' || gameState === 'gameover') {
-                    startGame();
+                    if (e.target === overlay || e.target.classList.contains('title') || e.target.classList.contains('subtitle')) {
+                        startGame();
+                    }
                 }
             });
         });
@@ -416,6 +649,7 @@
 
         init();
         draw();
+        fetchLeaderboard();
     </script>
 </body>
 </html>
